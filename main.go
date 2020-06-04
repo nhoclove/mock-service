@@ -16,6 +16,10 @@ var (
 	mPost = "POST"
 )
 
+func a(w http.ResponseWriter, r *http.Request) {
+	fmt.Printf("-----------a")
+}
+
 func main() {
 	router, err := initRouter()
 	if err != nil {
@@ -26,7 +30,7 @@ func main() {
 		fmt.Println(route)
 	}
 
-	log.Fatal(http.ListenAndServe(":8080", router))
+	log.Fatal(http.ListenAndServe(":3000", router))
 }
 
 func initRouter() (*mux, error) {
@@ -38,28 +42,30 @@ func initRouter() (*mux, error) {
 	router := newMux()
 	loggingMiddleware := logging()
 	for _, service := range services {
-		if service.Method == mGet {
-			router.GET(service.Path, loggingMiddleware(func(w http.ResponseWriter, r *http.Request) {
-				w.WriteHeader(service.Response.StatusCode)
+		s := service
+		if s.Method == mGet {
+			router.GET(s.Path, loggingMiddleware(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(s.Response.StatusCode)
 
-				for k, v := range service.Response.Header {
+				for k, v := range s.Response.Header {
 					w.Header().Add(k, v)
 				}
 
-				w.Write([]byte(service.Response.Body))
+				w.Write([]byte(s.Response.Body))
 			}))
 			continue
 		}
 
-		if service.Method == mPost {
-			router.POST(service.Path, loggingMiddleware(func(w http.ResponseWriter, r *http.Request) {
-				w.WriteHeader(service.Response.StatusCode)
+		if s.Method == mPost {
+			router.POST(s.Path, loggingMiddleware(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(s.Response.StatusCode)
 
-				for k, v := range service.Response.Header {
+				for k, v := range s.Response.Header {
 					w.Header().Add(k, v)
 				}
 
-				w.Write([]byte(service.Response.Body))
+				w.Write([]byte(s.Response.Body))
+
 			}))
 			continue
 		}
@@ -186,7 +192,7 @@ func logging() middleware {
 			rw := ResponseWriter{w, bytes.NewBuffer([]byte("")), 0}
 
 			// Call the next middleware/handler in the chain
-			next(rw, r)
+			next(&rw, r)
 
 			postRequest(rw)
 		}
@@ -222,12 +228,12 @@ type ResponseWriter struct {
 	StatusCode int
 }
 
-func (r ResponseWriter) Write(b []byte) (int, error) {
+func (r *ResponseWriter) Write(b []byte) (int, error) {
 	r.Data.Write(b)
 	return r.ResponseWriter.Write(b)
 }
 
-func (r ResponseWriter) WriteHeader(code int) {
+func (r *ResponseWriter) WriteHeader(code int) {
 	r.StatusCode = code
 	r.ResponseWriter.WriteHeader(code)
 }
