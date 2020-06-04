@@ -1,9 +1,9 @@
 # mock-service
 
-# Description
+### Description
 This is a simple mock server that allows quickly creating HTTP services
 via definition in JSON files in ./data folder.
-# How to
+### How to
 1. Define route in a JSON file in ./data folder
     - Path: URI
     - Method: HTTP methods(post, get ...)
@@ -18,6 +18,6 @@ via definition in JSON files in ./data folder.
 
     `# go run main.go`
 
-# Notes:
+### Notes:
 - No external dependencies
 - Only support POST, GET method for now
