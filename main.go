@@ -12,13 +12,11 @@ import (
 )
 
 var (
+	addr = ":3000"
+
 	mGet  = "GET"
 	mPost = "POST"
 )
-
-func a(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("-----------a")
-}
 
 func main() {
 	router, err := initRouter()
@@ -26,11 +24,13 @@ func main() {
 		log.Fatalf("Failed to init router: %v", err)
 	}
 
+	log.Println("############### ROUTES ################")
 	for _, route := range router.Routes() {
-		fmt.Println(route)
+		log.Println(route)
 	}
+	log.Println("############### ROUTES ################")
 
-	log.Fatal(http.ListenAndServe(":3000", router))
+	log.Fatal(http.ListenAndServe(addr, router))
 }
 
 func initRouter() (*mux, error) {
